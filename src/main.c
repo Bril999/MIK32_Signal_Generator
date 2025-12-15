@@ -38,8 +38,10 @@ int main(void)
     }
     HAL_EPIC_MaskLevelSet(HAL_EPIC_SPI_0_MASK | HAL_EPIC_DMA_MASK);
     HAL_IRQ_EnableInterrupts();
+    //xprintf("status1 = %d", &hdma_ch0);
     HAL_DMA_Start(&hdma_ch0, (void *)&word_src, (void *)&hdac1.Instance_dac->VALUE, values_quantity*sizeof(uint16_t) - 1);
-    
+    //xprintf("status2 = %d", &hdma_ch0);
+
     while (1)
     {
         // HAL_DMA_Start(&hdma_ch0, (void *)&word_src, (void *)&hdac1.Instance_dac->VALUE, values_quantity*sizeof(uint16_t) - 1);
@@ -61,6 +63,7 @@ void trap_handler()
 {   
     if (EPIC_CHECK_SPI_0())
     {
+        xprintf("SPI Check\n");
         HAL_SPI_IRQHandler(&hspi0);
         parse_SPI_parametrs();
         generate_signal(signal_form);
@@ -76,7 +79,9 @@ void trap_handler()
     {
         if (dma_active_channel == 0)
         {
+            //xprintf("status1 = %d\n", HAL_DMA_GetChannelIrq(&hdma_ch1));
             HAL_DMA_ClearLocalIrq(&hdma);
+            //xprintf("status2 = %d\n", HAL_DMA_GetChannelIrq(&hdma_ch1));
             // for (uint32_t i = 0; i < 4; i++)
             // {
             //     xprintf("elem = %d\n", word_dst[i]);
@@ -84,9 +89,11 @@ void trap_handler()
             HAL_DMA_Start(&hdma_ch1, (void *)&word_src, (void *)&hdac1.Instance_dac->VALUE, values_quantity*sizeof(uint16_t) - 1);
             dma_active_channel = 1;
         }
-        else
+        else if (dma_active_channel == 1)
         {
+            //xprintf("status3 = %d\n", HAL_DMA_GetChannelIrq(&hdma_ch1));
             HAL_DMA_ClearLocalIrq(&hdma);
+            //xprintf("status4 = %d\n", HAL_DMA_GetChannelIrq(&hdma_ch1));
             // for (uint32_t i = 0; i < 4; i++)
             // {
             //     xprintf("elem = %d\n", word_dst[i]);
