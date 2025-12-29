@@ -1,24 +1,20 @@
 #include "configuration.h"
 
 /* ===== Глобальные параметры ===== */
-const uint16_t sin_lut[SIN_LUT_SIZE] = {
-    2048, 2177, 2306, 2434, 2560, 2684, 2804, 2920, 3029, 3131,
-    3224, 3308, 3381, 3443, 3494, 3532, 3558, 3571, 3571, 3558,
-    3532, 3494, 3443, 3381, 3308, 3224, 3131, 3029, 2920, 2804,
-    2684, 2560, 2434, 2306, 2177, 2048, 1918, 1789, 1661, 1533,
-    1407, 1283, 1163, 1047, 938, 836, 743, 659, 586, 524,
-    473, 435, 409, 396, 396, 409, 435, 473, 524, 586,
-    659, 743, 836, 938, 1047, 1163, 1283, 1407, 1533, 1661,
-    1789, 1918
-};
-uint16_t tim32_top = 320;
+
+uint16_t tim32_top = 50;
 uint8_t dac_div = 31;
-uint16_t values_quantity = 100;
-uint32_t word_src[20];
+uint8_t values_quantity = 20;
+uint16_t word_src[20];
+uint16_t max_value = 4095;
+uint16_t min_value = 0;
+volatile uint8_t dma_last_started = 0;     // 0 -> 0 был запущен, 1 -> 1 был запущен
+volatile uint8_t dma_busy = 0;             // защита от повторного старта
 
 uint8_t signal_form = 0x00;
-uint16_t freq = 0x00;
-uint8_t amplitude = 0x00;
+uint8_t freq = 0x00;
+uint8_t start_ampl = 0x00;
+uint8_t finish_ampl = 0x00;
 
 /* ===== Хэндлы ===== */
 SPI_HandleTypeDef hspi0;
@@ -26,6 +22,7 @@ TIMER32_HandleTypeDef htimer32;
 TIMER32_CHANNEL_HandleTypeDef htimer32_channel;
 DMA_InitTypeDef hdma;
 DMA_ChannelHandleTypeDef hdma_ch0;
+DMA_ChannelHandleTypeDef hdma_ch1;
 DAC_HandleTypeDef hdac1;
 
 /* ====================== CLOCK ====================== */
@@ -43,7 +40,7 @@ void SystemClock_Config(void)
     PCC_OscInit.HSI32MCalibrationValue = 128;
     PCC_OscInit.LSI32KCalibrationValue = 8;
     PCC_OscInit.RTCClockSelection = PCC_RTC_CLOCK_SOURCE_AUTO;
-    PCC_OscInit.RTCClockCPUSelection = PCC_CPU_RTC_CLOCK_SOURCE_OSC32K;
+    PCC_OscInit.RTCClockCPUSelection = PCC_CPU_RTC_CLOCK_SOURCE_LSI32K;
 
     HAL_PCC_Config(&PCC_OscInit);
 }
@@ -56,7 +53,7 @@ void Timer32_Init(void)
     htimer32.State = TIMER32_STATE_DISABLE;
     htimer32.Clock.Source = TIMER32_SOURCE_PRESCALER;
     htimer32.Clock.Prescaler = 0;
-    htimer32.InterruptMask = 0;
+    htimer32.InterruptMask = TIMER32_INT_OVERFLOW_M | TIMER32_INT_UNDERFLOW_M;
     htimer32.CountMode = TIMER32_COUNTMODE_FORWARD;
     HAL_Timer32_Init(&htimer32);
 
@@ -77,21 +74,52 @@ static void DMA_CH0_InternalInit(DMA_InitTypeDef *hdma)
     hdma_ch0.dma = hdma;
 
     hdma_ch0.ChannelInit.Channel = DMA_CHANNEL_0;
-    hdma_ch0.ChannelInit.Priority = DMA_CHANNEL_PRIORITY_VERY_HIGH;
+    //hdma_ch0.ChannelInit.Priority = DMA_CHANNEL_PRIORITY_VERY_HIGH;
+    hdma_ch0.ChannelInit.Priority = DMA_CHANNEL_PRIORITY_LOW;
 
     hdma_ch0.ChannelInit.ReadMode = DMA_CHANNEL_MODE_MEMORY;
     hdma_ch0.ChannelInit.ReadInc = DMA_CHANNEL_INC_ENABLE;
-    hdma_ch0.ChannelInit.ReadSize = DMA_CHANNEL_SIZE_WORD;
+    hdma_ch0.ChannelInit.ReadSize = DMA_CHANNEL_SIZE_HALFWORD;
     hdma_ch0.ChannelInit.ReadBurstSize = 2;
     hdma_ch0.ChannelInit.ReadRequest = DMA_CHANNEL_TIMER32_1_REQUEST;
-    hdma_ch0.ChannelInit.ReadAck = DMA_CHANNEL_ACK_DISABLE;
+    hdma_ch0.ChannelInit.ReadAck = DMA_CHANNEL_ACK_ENABLE;
 
     hdma_ch0.ChannelInit.WriteMode = DMA_CHANNEL_MODE_PERIPHERY;
     hdma_ch0.ChannelInit.WriteInc = DMA_CHANNEL_INC_DISABLE;
-    hdma_ch0.ChannelInit.WriteSize = DMA_CHANNEL_SIZE_WORD;
+    hdma_ch0.ChannelInit.WriteSize = DMA_CHANNEL_SIZE_HALFWORD;
     hdma_ch0.ChannelInit.WriteBurstSize = 2;
     hdma_ch0.ChannelInit.WriteRequest = DMA_CHANNEL_TIMER32_1_REQUEST;
     hdma_ch0.ChannelInit.WriteAck = DMA_CHANNEL_ACK_ENABLE;
+
+    /* Настройка локального прерывания */
+    HAL_DMA_LocalIRQEnable(&hdma_ch0, DMA_IRQ_ENABLE);
+}
+
+static void DMA_CH1_InternalInit(DMA_InitTypeDef *hdma)
+{
+    /* Конфигурация для 2-го канала — в целом такая же, но Channel = 1 */
+    hdma_ch1.dma = hdma;
+
+    hdma_ch1.ChannelInit.Channel = DMA_CHANNEL_1;
+    //hdma_ch1.ChannelInit.Priority = DMA_CHANNEL_PRIORITY_VERY_HIGH;
+    hdma_ch1.ChannelInit.Priority = DMA_CHANNEL_PRIORITY_LOW;
+
+    hdma_ch1.ChannelInit.ReadMode = DMA_CHANNEL_MODE_MEMORY;
+    hdma_ch1.ChannelInit.ReadInc = DMA_CHANNEL_INC_ENABLE;
+    hdma_ch1.ChannelInit.ReadSize = DMA_CHANNEL_SIZE_HALFWORD;
+    hdma_ch1.ChannelInit.ReadBurstSize = 2;
+    hdma_ch1.ChannelInit.ReadRequest = DMA_CHANNEL_TIMER32_1_REQUEST;
+    hdma_ch1.ChannelInit.ReadAck = DMA_CHANNEL_ACK_ENABLE;
+
+    hdma_ch1.ChannelInit.WriteMode = DMA_CHANNEL_MODE_PERIPHERY;
+    hdma_ch1.ChannelInit.WriteInc = DMA_CHANNEL_INC_DISABLE;
+    hdma_ch1.ChannelInit.WriteSize = DMA_CHANNEL_SIZE_HALFWORD;
+    hdma_ch1.ChannelInit.WriteBurstSize = 2;
+    hdma_ch1.ChannelInit.WriteRequest = DMA_CHANNEL_TIMER32_1_REQUEST;
+    hdma_ch1.ChannelInit.WriteAck = DMA_CHANNEL_ACK_ENABLE;
+
+    /* Настройка локального прерывания */
+    HAL_DMA_LocalIRQEnable(&hdma_ch1, DMA_IRQ_ENABLE);
 }
 
 void DMA_Init(void)
@@ -102,7 +130,13 @@ void DMA_Init(void)
     if (HAL_DMA_Init(&hdma) != HAL_OK)
         xprintf("DMA_Init Error\n");
 
+    /* Настройка глобального прерывания DMA */
+    HAL_DMA_GlobalIRQEnable(&hdma, DMA_IRQ_ENABLE);
+    /* Настройка прерывания DMA при возникновении ошибки */
+    HAL_DMA_ErrorIRQEnable(&hdma, DMA_IRQ_ENABLE);
+
     DMA_CH0_InternalInit(&hdma);
+    DMA_CH1_InternalInit(&hdma);
 }
 
 /* ====================== SPI ====================== */
