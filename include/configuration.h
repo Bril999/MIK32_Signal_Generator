@@ -13,6 +13,8 @@
 #include "mik32_hal_gpio.h"
 
 /* === Глобальные параметры === */
+#define SIN_LUT_SIZE 100
+extern const uint16_t sin_lut[SIN_LUT_SIZE];
 extern uint16_t tim32_top;
 extern uint8_t dac_div;
 extern uint16_t values_quantity;

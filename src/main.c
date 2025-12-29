@@ -117,7 +117,7 @@ void generate_signal(uint8_t signal) {
               :  (4095 * (values_quantity-i))/(values_quantity/2);
         break;
     case 0x03: //Синус
-        // for (int i = 0; i < values_quantity; i++) word_src[i] = (sin(2*M_PI*i/values_quantity)+1) * 2047;
+        for (int i = 0; i < values_quantity; i++) word_src[i] = sin_lut[(i * SIN_LUT_SIZE) / values_quantity];
         break;
     case 0x04: //Меандр
         for (int i = 0; i < values_quantity; i++) word_src[i] = (i < values_quantity/2) ? 4095 : 0;
