@@ -13,7 +13,7 @@ const uint16_t sin_lut[SIN_LUT_SIZE] = {
 };
 uint16_t tim32_top = 320;
 uint8_t dac_div = 31;
-uint16_t values_quantity = 100;
+uint16_t values_quantity = 20;
 uint32_t word_src[20];
 
 uint8_t signal_form = 0x00;
