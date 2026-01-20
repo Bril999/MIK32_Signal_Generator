@@ -17,10 +17,13 @@ extern uint16_t tim32_top;
 extern uint8_t dac_div;
 extern uint16_t values_quantity;
 extern uint32_t word_src[20];
+extern uint16_t max_value;
+extern uint16_t min_value;
 
 extern uint8_t signal_form;
-extern uint16_t freq;
-extern uint8_t amplitude;
+extern uint8_t freq;
+extern uint8_t start_ampl;
+extern uint8_t finish_ampl;
 
 /* === Хэндлы периферии === */
 extern SPI_HandleTypeDef hspi0;

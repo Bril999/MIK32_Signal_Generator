@@ -39,7 +39,7 @@ int main(void)
        HAL_SPI_Init() не обязательно включает модуль; включаем явно. */
     HAL_SPI_Enable(&hspi0);
 
-    for (int i = 0; i < values_quantity; i++) word_src[i] = (4095 * i) / (values_quantity - 1); //повыносить в переменные
+    for (int i = min_value; i < values_quantity; i++) word_src[i] = (max_value * i) / (values_quantity - 1); //повыносить в переменные
 
     while (1)
     {
@@ -62,8 +62,8 @@ int main(void)
         /* Обработка завершённого обмена */
         if (hspi0.State == HAL_SPI_STATE_END)
         {
-            xprintf("SPI IRQ: RX completed:\n");
-            xprintf(" form = %02X, freg = %04X, ampl = %02X\n", signal_form, freq, amplitude);
+            // xprintf("SPI IRQ: RX completed:\n");
+            // xprintf(" form = %02X, freg = %02X, start_ampl = %02X , finish_ampl = %02X\n", signal_form, freq, start_ampl, finish_ampl);
 
             /* Подготовиться к следующему обмену */
             hspi0.State = HAL_SPI_STATE_READY;
@@ -101,26 +101,27 @@ void trap_handler()
 
 void parse_SPI_parametrs(void) {
     signal_form = slave_input[0];
-    freq = slave_input[1] | (slave_input[2] << 8);
-    amplitude = slave_input[3];
+    freq = slave_input[1];
+    start_ampl = slave_input[2];
+    finish_ampl = slave_input[3];
 }
 
 void generate_signal(uint8_t signal) {
     switch (signal)
     {
     case 0x01: //Пила
-        for (int i = 0; i < values_quantity; i++) word_src[i] = (4095 * i) / (values_quantity - 1);
+        for (int i = min_value; i < values_quantity; i++) word_src[i] = (max_value * i) / (values_quantity - 1);
         break;
     case 0x02: //Треугольник
-        for (int i = 0; i < values_quantity; i++) word_src[i] = (i < values_quantity/2)
-              ?  (4095 * i)/(values_quantity/2)
-              :  (4095 * (values_quantity-i))/(values_quantity/2);
+        for (int i = min_value; i < values_quantity; i++) word_src[i] = (i < values_quantity/2)
+              ?  (max_value * i)/(values_quantity/2)
+              :  (max_value * (values_quantity-i))/(values_quantity/2);
         break;
     case 0x03: //Синус
         // for (int i = 0; i < values_quantity; i++) word_src[i] = (sin(2*M_PI*i/values_quantity)+1) * 2047;
         break;
     case 0x04: //Меандр
-        for (int i = 0; i < values_quantity; i++) word_src[i] = (i < values_quantity/2) ? 4095 : 0;
+        for (int i = min_value; i < values_quantity; i++) word_src[i] = (i < values_quantity/2) ? max_value : min_value;
         break;
     default:
         break;
