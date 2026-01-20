@@ -5,8 +5,8 @@ uint16_t tim32_top = 320;
 uint8_t dac_div = 31;
 uint16_t values_quantity = 20;
 uint32_t word_src[20];
-uint16_t max_value = 4095;
-uint16_t min_value = 0;
+uint16_t max_value = 3000;
+uint16_t min_value = 1000;
 
 uint8_t signal_form = 0x00;
 uint8_t freq = 0x00;
