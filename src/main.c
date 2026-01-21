@@ -1,7 +1,5 @@
 #include "configuration.h"
-#include "mik32_hal_irq.h"
-#include "uart_lib.h"
-#include "xprintf.h"
+
 
 //#define PI 3.14159265358979323846
 
