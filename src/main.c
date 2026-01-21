@@ -1,12 +1,8 @@
 #include "configuration.h"
-
+#include "parse.h"
 
 //#define PI 3.14159265358979323846
 
-uint8_t slave_output[4];
-uint8_t slave_input[4];
-
-void parse_SPI_parametrs(void);
 void generate_signal(uint8_t signal);
 
 int main(void)
@@ -17,7 +13,6 @@ int main(void)
     UART_Init(UART_0, 3333, UART_CONTROL1_TE_M | UART_CONTROL1_M_8BIT_M, 0, 0);
     DAC_Init();
     GPIO_Init();
-
     Timer32_Init();
 
     HAL_Timer32_Channel_Enable(&htimer32_channel);
@@ -29,7 +24,7 @@ int main(void)
     HAL_IRQ_EnableInterrupts();
 
     
-    xprintf("MIK32 SPI Slave (IRQ) example start\n");
+    xprintf("MIK32 SPI Slave (IRQ) example start, %d\n", max_value);
 
     SPI0_Init();
 
@@ -58,29 +53,12 @@ int main(void)
         }
 
         /* Обработка завершённого обмена */
-        if (hspi0.State == HAL_SPI_STATE_END)
-        {
-            // xprintf("SPI IRQ: RX completed:\n");
-            // xprintf(" form = %02X, freg = %02X, start_ampl = %02X , finish_ampl = %02X\n", signal_form, freq, start_ampl, finish_ampl);
-
-            /* Подготовиться к следующему обмену */
-            hspi0.State = HAL_SPI_STATE_READY;
-        }
-
-        /* Обработка ошибок */
-        if (hspi0.State == HAL_SPI_STATE_ERROR)
-        {
-            xprintf("SPI_Error: OVR %d, MODF %d\n",
-                    (hspi0.ErrorCode & HAL_SPI_ERROR_OVR) ? 1 : 0,
-                    (hspi0.ErrorCode & HAL_SPI_ERROR_MODF) ? 1 : 0);
-
-            HAL_SPI_ClearError(&hspi0);
-        /* В примере референса SPI временно выключают — можно сделать так же */
-            HAL_SPI_Disable(&hspi0);
-            HAL_DelayMs(1);
-            HAL_SPI_Enable(&hspi0);
-            hspi0.State = HAL_SPI_STATE_READY;
-        }
+        // if (hspi0.State == HAL_SPI_STATE_END)
+        // {
+        //     // xprintf("SPI IRQ: RX completed:\n");
+        //     // xprintf(" form = %02X, freg = %02X, start_ampl = %02X , finish_ampl = %02X\n", signal_form, freq, start_ampl, finish_ampl);
+        //     hspi0.State = HAL_SPI_STATE_READY;
+        // }
     }
 }
 
@@ -89,26 +67,25 @@ void trap_handler()
     if (EPIC_CHECK_SPI_0())
     {
         HAL_SPI_IRQHandler(&hspi0);
-        parse_SPI_parametrs();
-        generate_signal(signal_form);
+
+        if (hspi0.State == HAL_SPI_STATE_END)
+        {
+            parse_SPI_parametrs();
+            generate_signal(signal_form);
+
+            hspi0.State = HAL_SPI_STATE_READY;
+        }
     }
 
-    /* Сброс прерываний (очистка EPIC статуса) */
     HAL_EPIC_Clear(0xFFFFFFFF);
 }
 
-void parse_SPI_parametrs(void) {
-    signal_form = slave_input[0];
-    freq = slave_input[1];
-    start_ampl = slave_input[2];
-    finish_ampl = slave_input[3];
-}
 
 void generate_signal(uint8_t signal) {
     switch (signal)
     {
     case 0x01: //Пила
-        for (int i = 0; i < values_quantity; i++) word_src[i] = min_value + ((max_value - min_value) * i) / (values_quantity - 1);
+        for (int i = 0; i < values_quantity; i++) word_src[i] = min_value + ((finish_ampl - min_value) * i) / (values_quantity - 1);
         break;
     case 0x02: //Треугольник
         for (int i = 0; i < values_quantity; i++) word_src[i] = (i < values_quantity/2)

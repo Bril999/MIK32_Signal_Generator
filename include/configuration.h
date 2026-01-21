@@ -19,11 +19,13 @@ extern uint16_t values_quantity;
 extern uint32_t word_src[20];
 extern uint16_t max_value;
 extern uint16_t min_value;
+extern uint8_t slave_output[4];
+extern uint8_t slave_input[4];
 
-extern uint8_t signal_form;
-extern uint8_t freq;
-extern uint8_t start_ampl;
-extern uint8_t finish_ampl;
+extern uint16_t signal_form;
+extern uint16_t freq;
+extern uint16_t start_ampl;
+extern uint16_t finish_ampl;
 
 /* === Хэндлы периферии === */
 extern SPI_HandleTypeDef hspi0;
@@ -42,7 +44,7 @@ void DAC_Init(void);
 void GPIO_Init(void);
 
 /* === Функции логики === */
-void parse_SPI_parametrs(void);
+
 void generate_signal(uint8_t signal);
 
 #endif

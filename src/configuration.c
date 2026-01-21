@@ -6,12 +6,12 @@ uint8_t dac_div = 31;
 uint16_t values_quantity = 20;
 uint32_t word_src[20];
 uint16_t max_value = 3700;
-uint16_t min_value = 2400;
+uint16_t min_value = 0;
 
-uint8_t signal_form = 0x00;
-uint8_t freq = 0x00;
-uint8_t start_ampl = 0x00;
-uint8_t finish_ampl = 0x00;
+uint16_t signal_form = 0x00;
+uint16_t freq = 0x00;
+uint16_t start_ampl = 0x00;
+uint16_t finish_ampl = 0x00;
 
 /* ===== Хэндлы ===== */
 SPI_HandleTypeDef hspi0;
