@@ -4,7 +4,7 @@
 uint8_t slave_output[4];
 uint8_t slave_input[4];
 
-const uint16_t max_ampl_table[MAX_AMPL_SIZE] = 
+const uint16_t max_ampl_table[MAX_AMPL_SIZE] = //таблица констант для максимального значения амплитуды
 {
     300,
     750,
