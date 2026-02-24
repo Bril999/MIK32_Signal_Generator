@@ -85,18 +85,18 @@ void generate_signal(uint8_t signal) {
     switch (signal)
     {
     case 0x01: //Пила
-        for (int i = 0; i < values_quantity; i++) word_src[i] = min_value + ((finish_ampl - min_value) * i) / (values_quantity - 1);
+        for (int i = 0; i < values_quantity; i++) word_src[i] = start_ampl + ((finish_ampl - start_ampl) * i) / (values_quantity - 1);
         break;
     case 0x02: //Треугольник
         for (int i = 0; i < values_quantity; i++) word_src[i] = (i < values_quantity/2)
-              ?  min_value + ((finish_ampl - min_value) * i)/(values_quantity/2)
-              :  min_value + ((finish_ampl - min_value) * (values_quantity-i))/(values_quantity/2);
+              ?  start_ampl + ((finish_ampl - start_ampl) * i)/(values_quantity/2)
+              :  start_ampl + ((finish_ampl - start_ampl) * (values_quantity-i))/(values_quantity/2);
         break;
     case 0x03: //Синус
         // for (int i = 0; i < values_quantity; i++) word_src[i] = (sin(2*M_PI*i/values_quantity)+1) * 2047;
         break;
     case 0x04: //Меандр
-        for (int i = 0; i < values_quantity; i++) word_src[i] = (i < values_quantity/2) ? finish_ampl : min_value;
+        for (int i = 0; i < values_quantity; i++) word_src[i] = (i < values_quantity/2) ? finish_ampl : start_ampl;
         break;
     default:
         break;
