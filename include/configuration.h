@@ -12,6 +12,8 @@
 #include "mik32_hal_irq.h"
 #include "mik32_hal_gpio.h"
 
+#define DAC_DIV 31
+
 /* === Глобальные параметры === */
 extern uint16_t tim32_top;
 extern uint8_t dac_div;

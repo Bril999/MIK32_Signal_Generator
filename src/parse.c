@@ -29,7 +29,7 @@ const uint16_t min_ampl_table[AMPL_SIZE] = //таблица констант д�
     2750, //1200мВ
     3200, //1400мВ
     3600, //1600мВ
-    3990 //1600мВ
+    3990 //1800мВ
 };
 
 void parse_SPI_parametrs(void) {

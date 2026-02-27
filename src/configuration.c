@@ -2,7 +2,7 @@
 
 /* ===== Глобальные параметры ===== */
 uint16_t tim32_top = 100;
-uint8_t dac_div = 31;
+uint8_t dac_div = DAC_DIV;
 uint16_t values_quantity = 20;
 uint32_t word_src[20];
 uint16_t max_value = 2047;

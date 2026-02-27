@@ -23,16 +23,13 @@ int main(void)
     HAL_EPIC_MaskLevelSet(HAL_EPIC_SPI_0_MASK);
     HAL_IRQ_EnableInterrupts();
 
-    
-    xprintf("MIK32 SPI Slave (IRQ) example start, %d\n", max_value);
-
     SPI0_Init();
 
     /* Включаем SPI один раз и не выключаем.
        HAL_SPI_Init() не обязательно включает модуль; включаем явно. */
     HAL_SPI_Enable(&hspi0);
 
-    for (int i = 0; i < values_quantity; i++) word_src[i] = min_value + ((max_value - min_value) * i) / (values_quantity - 1); //повыносить в переменные
+    for (int i = 0; i < values_quantity; i++) word_src[i] = min_value + ((max_value - min_value) * i) / (values_quantity - 1);
 
     while (1)
     {
