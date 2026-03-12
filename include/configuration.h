@@ -13,6 +13,7 @@
 #include "mik32_hal_gpio.h"
 
 #define SIN_LUT_SIZE 64
+#define DAC_DIV      31
 
 /* === Глобальные параметры === */
 extern uint16_t tim32_top;
