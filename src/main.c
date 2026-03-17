@@ -96,9 +96,12 @@ void generate_signal(uint8_t signal) {
             int idx = (i * SIN_LUT_SIZE) / values_quantity;
             word_src[i] = start_ampl + (sin_lut[idx] * ampl) / 4095;
         }
-break;
+        break;
     case 0x04: //Меандр
         for (int i = 0; i < values_quantity; i++) word_src[i] = (i < values_quantity/2) ? finish_ampl : start_ampl;
+        break;
+    case 0x05: //Постоянное напряжение
+        for (int i = 0; i < values_quantity; i++) word_src[i] = finish_ampl;
         break;
     default:
         break;
