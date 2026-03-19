@@ -93,11 +93,19 @@ void generate_signal(uint8_t signal) {
               ?  start_ampl + ((finish_ampl - start_ampl) * i)/(values_quantity/2)
               :  start_ampl + ((finish_ampl - start_ampl) * (values_quantity-i))/(values_quantity/2);
         break;
-    case 0x03: //Синус
-        // for (int i = 0; i < values_quantity; i++) word_src[i] = (sin(2*M_PI*i/values_quantity)+1) * 2047;
+    case 0x03: // Синус
+    uint32_t ampl = finish_ampl - start_ampl;
+    for (int i = 0; i < values_quantity; i++)
+        {
+            int idx = (i * SIN_LUT_SIZE) / values_quantity;
+            word_src[i] = start_ampl + (sin_lut[idx] * ampl) / 4095;
+        }
         break;
     case 0x04: //Меандр
         for (int i = 0; i < values_quantity; i++) word_src[i] = (i < values_quantity/2) ? finish_ampl : start_ampl;
+        break;
+    case 0x05: //Постоянное напряжение
+        for (int i = 0; i < values_quantity; i++) word_src[i] = finish_ampl;
         break;
     default:
         break;
