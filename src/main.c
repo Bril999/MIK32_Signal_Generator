@@ -35,11 +35,11 @@ int main(void)
     {
         HAL_DMA_Start(&hdma_ch0, (void *)&word_src, (void *)&hdac1.Instance_dac->VALUE, sizeof(word_src) - 1); 
         #if 1
-        if (HAL_DMA_Wait(&hdma_ch0, DMA_TIMEOUT_DEFAULT) != HAL_OK); //обязательно для корректной работы DMA
+        if (HAL_DMA_Wait(&hdma_ch0, DMA_TIMEOUT_DEFAULT) != HAL_OK) HAL_DMA_Start(&hdma_ch0, (void *)&word_src, (void *)&hdac1.Instance_dac->VALUE, sizeof(word_src) - 1);; //обязательно для корректной работы DMA
         #endif
         /* Если SPI готов — начинаем обмен в прерывном режиме.
            HAL_SPI_Exchange_IT установит hspi0.State != READY пока идёт обмен. */
-        
+        #if 1
         if (hspi0.State == HAL_SPI_STATE_READY)
         {
             HAL_StatusTypeDef SPI_Status = HAL_SPI_Exchange_IT(&hspi0, slave_output, slave_input, sizeof(slave_output));
@@ -51,6 +51,7 @@ int main(void)
                 hspi0.State = HAL_SPI_STATE_READY;
             }
         }
+        #endif
 
         /* Обработка завершённого обмена */
         // if (hspi0.State == HAL_SPI_STATE_END)

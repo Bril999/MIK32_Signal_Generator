@@ -1,10 +1,10 @@
 #include "configuration.h"
 
 /* ===== Глобальные параметры ===== */
-uint16_t tim32_top = 20;
+uint16_t tim32_top = 25;
 uint8_t dac_div = DAC_DIV;
-uint16_t values_quantity = 7;
-uint32_t word_src[7];
+uint16_t values_quantity = 16;
+uint32_t word_src[16];
 uint16_t max_value = 4095;
 uint16_t min_value = 0;
 

@@ -18,7 +18,7 @@
 extern uint16_t tim32_top;
 extern uint8_t dac_div;
 extern uint16_t values_quantity;
-extern uint32_t word_src[7];
+extern uint32_t word_src[16];
 extern uint16_t max_value;
 extern uint16_t min_value;
 extern uint8_t slave_output[4];
