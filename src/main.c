@@ -20,7 +20,7 @@ int main(void)
     HAL_Timer32_Start(&htimer32);
     
 
-    HAL_EPIC_MaskLevelSet(HAL_EPIC_SPI_0_MASK);
+    HAL_EPIC_MaskLevelSet(HAL_EPIC_SPI_0_MASK | HAL_EPIC_DMA_MASK);
     HAL_IRQ_EnableInterrupts();
 
     SPI0_Init();
@@ -33,9 +33,8 @@ int main(void)
 
     while (1)
     {
-        HAL_DMA_Start(&hdma_ch0, (void *)&word_src, (void *)&hdac1.Instance_dac->VALUE, sizeof(word_src) - 1); 
-        #if 1
-        if (HAL_DMA_Wait(&hdma_ch0, DMA_TIMEOUT_DEFAULT) != HAL_OK) HAL_DMA_Start(&hdma_ch0, (void *)&word_src, (void *)&hdac1.Instance_dac->VALUE, sizeof(word_src) - 1);; //обязательно для корректной работы DMA
+        #if 0
+        if (HAL_DMA_Wait(&hdma_ch0, DMA_TIMEOUT_DEFAULT) != HAL_OK); //обязательно для корректной работы DMA
         #endif
         /* Если SPI готов — начинаем обмен в прерывном режиме.
            HAL_SPI_Exchange_IT установит hspi0.State != READY пока идёт обмен. */
@@ -65,6 +64,10 @@ int main(void)
 
 void trap_handler()
 {
+    if (EPIC_CHECK_DMA())
+    {
+        
+    }
     if (EPIC_CHECK_SPI_0())
     {
         HAL_SPI_IRQHandler(&hspi0);
