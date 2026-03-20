@@ -96,6 +96,8 @@ static void DMA_CH0_InternalInit(DMA_InitTypeDef *hdma)
     hdma_ch0.ChannelInit.WriteBurstSize = 2;
     hdma_ch0.ChannelInit.WriteRequest = DMA_CHANNEL_TIMER32_1_REQUEST;
     hdma_ch0.ChannelInit.WriteAck = DMA_CHANNEL_ACK_ENABLE;
+
+    HAL_DMA_LocalIRQEnable(&hdma_ch0, DMA_IRQ_ENABLE);
 }
 
 void DMA_Init(void)
