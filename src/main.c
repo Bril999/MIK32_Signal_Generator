@@ -30,6 +30,7 @@ int main(void)
     HAL_SPI_Enable(&hspi0);
 
     for (int i = 0; i < values_quantity; i++) word_src[i] = min_value + ((max_value - min_value) * i) / (values_quantity - 1);
+    HAL_DMA_Start(&hdma_ch0, (void *)&word_src, (void *)&hdac1.Instance_dac->VALUE, sizeof(word_src) - 1);
 
     while (1)
     {
@@ -67,6 +68,9 @@ void trap_handler()
     if (EPIC_CHECK_DMA())
     {
         HAL_DMA_Start(&hdma_ch0, (void *)&word_src, (void *)&hdac1.Instance_dac->VALUE, sizeof(word_src) - 1);
+        #if 1
+        HAL_DMA_ClearLocalIrq(&hdma);
+        #endif
     }
     if (EPIC_CHECK_SPI_0())
     {
