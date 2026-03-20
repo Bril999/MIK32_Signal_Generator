@@ -66,7 +66,7 @@ void trap_handler()
 {
     if (EPIC_CHECK_DMA())
     {
-        
+        HAL_DMA_Start(&hdma_ch0, (void *)&word_src, (void *)&hdac1.Instance_dac->VALUE, sizeof(word_src) - 1);
     }
     if (EPIC_CHECK_SPI_0())
     {
