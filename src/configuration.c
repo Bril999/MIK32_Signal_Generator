@@ -108,6 +108,11 @@ void DMA_Init(void)
     if (HAL_DMA_Init(&hdma) != HAL_OK)
         xprintf("DMA_Init Error\n");
 
+    /* Настройка глобального прерывания DMA */
+    HAL_DMA_GlobalIRQEnable(&hdma, DMA_IRQ_ENABLE);
+    /* Настройка прерывания DMA при возникновении ошибки */
+    HAL_DMA_ErrorIRQEnable(&hdma, DMA_IRQ_ENABLE);
+    
     DMA_CH0_InternalInit(&hdma);
 }
 

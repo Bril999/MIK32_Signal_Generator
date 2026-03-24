@@ -70,8 +70,11 @@ void trap_handler()
         HAL_DMA_Start(&hdma_ch0, (void *)&word_src, (void *)&hdac1.Instance_dac->VALUE, sizeof(word_src) - 1);
         #if 1
         HAL_DMA_ClearLocalIrq(&hdma);
+        HAL_DMA_ClearGlobalIrq(&hdma);
+        HAL_DMA_ClearErrorIrq(&hdma);
         #endif
     }
+    #if 1
     if (EPIC_CHECK_SPI_0())
     {
         HAL_SPI_IRQHandler(&hspi0);
@@ -84,6 +87,7 @@ void trap_handler()
             hspi0.State = HAL_SPI_STATE_READY;
         }
     }
+    #endif
 
     HAL_EPIC_Clear(0xFFFFFFFF);
 }
