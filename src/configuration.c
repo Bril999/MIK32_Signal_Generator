@@ -75,7 +75,7 @@ void Timer32_Init(void)
 }
 
 /* ====================== DMA ====================== */
-
+#if 0
 static void DMA_CH0_InternalInit(DMA_InitTypeDef *hdma)
 {
     hdma_ch0.dma = hdma;
@@ -96,10 +96,16 @@ static void DMA_CH0_InternalInit(DMA_InitTypeDef *hdma)
     hdma_ch0.ChannelInit.WriteBurstSize = 2;
     hdma_ch0.ChannelInit.WriteRequest = DMA_CHANNEL_TIMER32_1_REQUEST;
     hdma_ch0.ChannelInit.WriteAck = DMA_CHANNEL_ACK_ENABLE;
-
     HAL_DMA_LocalIRQEnable(&hdma_ch0, DMA_IRQ_ENABLE);
 }
+#endif
+static void DMA_CH0_InternalInit(DMA_InitTypeDef *hdma) {
+    // hdma_ch0.dma = hdma;
 
+    DMA_ChannelHandleTypeDef *hdma_channel = 0;
+    uint32_t ChannelIndex = hdma_channel->ChannelInit.Channel;
+    hdma_channel->dma->Instance->CHANNELS[ChannelIndex];
+}
 void DMA_Init(void)
 {
     hdma.Instance = DMA_CONFIG;
