@@ -12,8 +12,9 @@
 #include "mik32_hal_irq.h"
 #include "mik32_hal_gpio.h"
 
-#define SIN_LUT_SIZE 64
-#define DAC_DIV      31
+#define SIN_LUT_SIZE  64
+#define FREQ_LUT_SIZE 50
+#define DAC_DIV       31
 
 /* === Глобальные параметры === */
 extern uint16_t tim32_top;
@@ -25,6 +26,7 @@ extern uint16_t min_value;
 extern uint8_t slave_output[4];
 extern uint8_t slave_input[4];
 extern uint16_t sin_lut[SIN_LUT_SIZE];
+extern uint16_t freq_lut[FREQ_LUT_SIZE];
 
 extern uint16_t signal_form;
 extern uint16_t freq;

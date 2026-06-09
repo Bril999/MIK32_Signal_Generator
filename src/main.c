@@ -1,8 +1,6 @@
 #include "configuration.h"
 #include "parse.h"
 
-//#define PI 3.14159265358979323846
-
 void generate_signal(uint8_t signal);
 
 int main(void)
@@ -106,4 +104,6 @@ void generate_signal(uint8_t signal) {
     default:
         break;
     }
+    tim32_top = freq;
+    htimer32.Instance->TOP = tim32_top;
 }

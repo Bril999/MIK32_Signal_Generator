@@ -34,7 +34,7 @@ const uint16_t min_ampl_table[AMPL_SIZE] = //таблица констант д�
 
 void parse_SPI_parametrs(void) {
     signal_form = slave_input[0];
-    freq = slave_input[1];
+    freq = freq_lut[slave_input[1] - 1];
     start_ampl = min_ampl_table [slave_input[2]];
     finish_ampl = max_ampl_table[slave_input[3] - 1];
 }
